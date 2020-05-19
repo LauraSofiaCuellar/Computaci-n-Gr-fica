@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ILUMINACION Y TEXTURAS</title>
+    <style>
+      html, body { margin: 0; padding: 0; overflow: hidden;
+}
+    </style>
+  </head>
+  <body>
+    <script src="js/three.js"></script>
+	<script src="js/controls/OrbitControls.js"></script>
+	<script src="js/csg.js"></script>
+	<script src="js/THREE.CSG.js"></script>
+
+    <script>
+		var scene, aspect, camera, camera2, renderer, controls;
+		var mapWidth = 320, mapHeight = 240;
+		var w = window.innerWidth, h = window.innerHeight;
+		
+		var spheres = [];
+		
+		
+		init();
+		animate();
+		
+		
+		function init(){
+		
+			//INICIALIZACIÓN
+	        scene = new THREE.Scene();
+	        aspect = window.innerWidth / window.innerHeight;
+	        camera = new THREE.PerspectiveCamera( 75, aspect, 0.1, 1000);
+			camera2 = new THREE.PerspectiveCamera( 45, aspect, 0.1, 1000);
+	        renderer = new THREE.WebGLRenderer();
+	        renderer.setSize( window.innerWidth, window.innerHeight );
+	        document.body.appendChild( renderer.domElement );
+			controls = new THREE.OrbitControls( camera, renderer.domElement );
+			renderer.shadowMap.enabled = true;
+			renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+			renderer.outputEncoding = THREE.sRGBEncoding;
+		
+			//ELEMENTOS COMUNES
+			var size = 10;
+			var arrowSize = 1;
+			var divisions = size;
+			var origin = new THREE.Vector3( 0, 0, 0 );
+			var x = new THREE.Vector3( 1, 0, 0 );
+			var y = new THREE.Vector3( 0, 1, 0 );
+		  	var z = new THREE.Vector3( 0, 0, 1 );
+		  	var color = new THREE.Color( 0x333333 );
+		  	var colorR = new THREE.Color( 0xAA3333 );
+		  	var colorG = new THREE.Color( 0x33AA33 );
+		  	var colorB = new THREE.Color( 0x333366 );
+			
+
+            //CREAR ILUMINACIÓN
+			//PUNTOS DE LUZ (LUMOS-VARITA MAGICA)
+            //varitas magicas MATERIAL
+			
+			var varita1= new THREE.MeshPhysicalMaterial( {
+					color: 0x2ee3ff,
+					metalness: 0,
+					roughness: 0,
+					depthWrite: false,
+					opacity: 0.3,
+					transparent: true
+				} );
+				
+			var varita2= new THREE.MeshPhysicalMaterial( {
+					color: 0x2ee3ff,
+					metalness: 0,
+					roughness: 0,
+					depthWrite: false,
+					opacity: 0.2,
+					transparent: true
+				} );
+			var varita3= new THREE.MeshPhysicalMaterial( {
+					color: 0xffffff,
+					metalness: 0,
+					roughness: 0,
+					depthWrite: false,
+					opacity: 0.1,
+					transparent: true
+				} );	
+
+			var sphere = new THREE.SphereBufferGeometry( 0.1, 16, 8 );	
+			var sphere2 = new THREE.SphereBufferGeometry( 0.2, 16, 8 );	
+			var sphere3 = new THREE.SphereBufferGeometry( 0.3, 16, 8 );
+			var sphere4 = new THREE.SphereBufferGeometry( 0.5, 16, 8 );
+			var sphere5 = new THREE.SphereBufferGeometry( 1, 16, 8 );
+			
+            var pointLight = new THREE.PointLight( 0x00ffee, 1.5, 3 );
+			pointLight.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { color: 0xf0fdff } ) ) );
+			pointLight.add( new THREE.Mesh( sphere2, varita1 ) );
+			pointLight.add( new THREE.Mesh( sphere3, varita2 ) );
+			pointLight.add( new THREE.Mesh( sphere4, varita3 ) );
+            pointLight.position.set( -0.2, 1, -5 );
+			pointLight.castShadow = true;  
+            scene.add( pointLight );
+					
+			var pointLight2 = new THREE.PointLight( 0x00ffee, 1, 15 );
+			pointLight2.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { color: 0xf0fdff } ) ) );
+			pointLight2.add( new THREE.Mesh( sphere2, varita1 ) );
+			pointLight2.add( new THREE.Mesh( sphere3, varita2 ) );
+			pointLight2.add( new THREE.Mesh( sphere4, varita3 ) );
+            pointLight2.position.set( -4.5, 1, -2 );
+			pointLight2.castShadow = true;
+            scene.add( pointLight2 );	
+			
+			var pointLight3 = new THREE.PointLight( 0x00ffee, 3, 7 );
+			pointLight3.add( new THREE.Mesh( sphere2, new THREE.MeshBasicMaterial( { color: 0xf0fdff } ) ) );
+			pointLight3.add( new THREE.Mesh( sphere3, varita1 ) );
+			pointLight3.add( new THREE.Mesh( sphere4, varita2 ) );
+			pointLight3.add( new THREE.Mesh( sphere5, varita2 ) );
+            pointLight3.position.set( 1, 1, 3 );
+			pointLight3.castShadow = true;
+            scene.add( pointLight3 );
+			
+			var pointLight4 = new THREE.PointLight( 0x00ffee, 1.5, 5 );
+			pointLight4.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { color: 0xf0fdff } ) ) );
+			pointLight4.add( new THREE.Mesh( sphere2, varita1 ) );
+			pointLight4.add( new THREE.Mesh( sphere3, varita2 ) );
+			pointLight4.add( new THREE.Mesh( sphere4, varita3 ) );
+            pointLight4.position.set( 4.5, 1, -2 );
+			pointLight4.castShadow = true;
+            scene.add( pointLight4 );
+			
+			
+			//LUZ AMBIENTE (OSCURO)
+			var ambient = new THREE.AmbientLight( 0x002429, 0.5);
+			scene.add( ambient );
+			
+						
+			//SPOTLIGHT
+			var spotLight = new THREE.SpotLight( 0x41a1ff, 1 );
+			spotLight.position.set( 0, 8, -20 );
+			spotLight.penumbra = 0.5;
+			spotLight.decay = 2;
+			spotLight.distance = 200;
+			spotLight.castShadow = true;
+			scene.add( spotLight );
+
+			
+			
+			//TEXTURAS
+			var texturaTela = new THREE.TextureLoader().load('texturas/tela.jpg');	
+			texturaTela.wrapS = THREE.RepeatWrapping;
+			texturaTela.wrapT = THREE.RepeatWrapping;
+			texturaTela.repeat.set(20, 20);		
+
+			var texturaTela2 = new THREE.TextureLoader().load('texturas/tela2.jpg');	
+					
+			
+			var texturaPiso = new THREE.TextureLoader().load('texturas/piso.jpg');		
+			texturaPiso.wrapS = THREE.RepeatWrapping;
+			texturaPiso.wrapT = THREE.RepeatWrapping;
+			texturaPiso.repeat.set( 13.5, 20);
+			
+			var texturaCristal = new THREE.TextureLoader().load('texturas/cristal.jpg');
+			
+			
+			var texturaPiel = new THREE.TextureLoader().load('texturas/piel.jpg');
+			texturaPiel.wrapS = THREE.RepeatWrapping;
+			texturaPiel.wrapT = THREE.RepeatWrapping;
+			texturaPiel.repeat.set(2, 2);		
+			
+			//CREAR LOS MATERIALES
+
+			var material3 = new THREE.MeshStandardMaterial( { map:texturaCristal, metalness: .19, roughness: 0.29 } );
+			
+			
+			//telas
+			
+			var telaMaterial = new THREE.MeshStandardMaterial( { 
+					color: 0xa8a7b1,
+					emissiveIntensity : .2,
+					roughness :.9,
+					bumpMap: texturaTela,
+					bumpScale: 0.1,    
+			} );
+			
+			var tela2Material = new THREE.MeshStandardMaterial( { 
+					color: 0xb0241b,
+					emissiveIntensity : .1,
+					roughness :.8,
+					map : texturaTela2,
+					    
+			} );
+			
+			var tela3Material = new THREE.MeshStandardMaterial( { 
+					color: 0x132021,
+					emissiveIntensity : .1,
+					roughness :.8,
+					map: texturaTela2,
+					   
+			} );
+			var tela4Material = new THREE.MeshStandardMaterial( { 
+					color: 0x010101,
+					emissiveIntensity : .1,
+					roughness :.8,
+					map: texturaTela2,
+					 
+			} );
+			var tela5Material = new THREE.MeshStandardMaterial( { 
+					color: 0xffffff,
+					emissiveIntensity : .1,
+					roughness :.8,
+					bumpMap: texturaTela,
+					bumpScale: 2,  
+			} );
+			
+			
+			
+			//piso
+			
+			var pisoMaterial = new THREE.MeshPhongMaterial( { 
+					color: 0x111110,
+                    shininess: 1,
+                    specular: 0x0a0a0a,
+				    envMap: scene.background,
+					reflectivity:1,
+					bumpMap: texturaPiso,
+					bumpScale: 2, 
+			} );
+			
+			
+			//bolas 
+			var material1 = new THREE.MeshStandardMaterial( { 
+					color: 0xa4a5a5,			    
+					metalness: 0.2,
+					roughness: 0.36,					
+					emissiveIntensity : .4,
+					map: texturaCristal,
+			} );
+			
+			
+			
+			//piel
+            var material2 = new THREE.MeshPhongMaterial( {
+					color: 0xd9c1af,
+					specular: 0xd9c1af,
+					shininess: .1,
+					bumpMap: texturaPiel,
+					bumpScale: .2
+				} );
+				
+				
+			
+			
+									
+			//CREAR LAS GEOMETRÍAS
+			var boxGeometry = new THREE.BoxGeometry( 2, 0.1, 30 );	
+			var CylinderGeometry = new THREE.CylinderGeometry(.5,.5,1.5,50);
+			var CylinderGeometry2 = new THREE.CylinderGeometry(.5,.5,1,50);
+			var SphereGeometry = new THREE.SphereGeometry(.3,.3,.3,50);
+			var CylinderGeometry3 = new THREE.CylinderGeometry(.4,.4,1,50);
+			
+			
+			
+			
+			
+			//PISO
+			var Piso= new THREE.Mesh( boxGeometry, pisoMaterial);
+			Piso.applyMatrix( new THREE.Matrix4().makeScale(15,1,1.5) );
+			Piso.translateY(-1);
+			Piso.translateZ(10);
+			Piso.receiveShadow = true;			
+			scene.add(Piso);
+						
+			//ESTANTES
+			var estante1= new THREE.Mesh( boxGeometry, material3 );
+			estante1.translateX(-5);			
+			estante1.translateZ(15);			
+			var estante11= estante1.clone();
+			estante11.translateY(-.9);			
+			var estante111= estante1.clone();
+			estante111.translateY(.9);			
+			var estante1111= estante1.clone();
+			estante1111.translateY(1.8);
+			var estante11111= estante1.clone();
+			estante11111.translateY(2.7);
+			
+			var boxCSG = THREE.CSG.fromMesh(estante1);
+			var boxCSG2 = THREE.CSG.fromMesh(estante11);
+			var boxCSG3 = THREE.CSG.fromMesh(estante111);
+			var boxCSG4 = THREE.CSG.fromMesh(estante1111);
+			var boxCSG5 = THREE.CSG.fromMesh(estante11111);
+			
+			var result1= boxCSG.union( boxCSG2);
+			var result2= result1.union( boxCSG3);
+			var result3= result2.union( boxCSG4);
+			var result4= result3.union( boxCSG5);
+			var est1= THREE.CSG.toMesh( result4 );
+						
+			est1.material = material3; 
+			est1.castShadow = true;
+			est1.receiveShadow = true;
+			scene.add(est1);
+			
+			var est2=est1.clone();
+			est2.translateX(9);
+			est2.castShadow = true;
+			est1.receiveShadow = true;
+			scene.add(est2);
+			
+			
+			for(var k=0; k<5; k++){
+				for ( var i = 0; i < 2; i ++ ) {
+					for ( var j = 0; j < 20; j ++ ) {
+						var mesh = new THREE.Mesh( SphereGeometry, material1 );
+						var num= Math.random()*.3+ .7;
+						mesh.applyMatrix( new THREE.Matrix4().makeScale(num,num, num) );
+						mesh.position.x = -6+ Math.random()*0.8+ 0.9*i;
+						mesh.position.y = -.5+0.89*k;
+						mesh.position.z = .5+1.5*j;
+						mesh.castShadow = true; 
+						mesh.receiveShadow = true; 
+						scene.add( mesh );
+						spheres.push( mesh );
+					}
+				}
+			}
+			for(var k=0; k<5; k++){
+				for ( var i = 0; i < 2; i ++ ) {
+					for ( var j = 0; j < 20; j ++ ) {
+						var mesh = new THREE.Mesh( SphereGeometry, material1 );
+						var num= Math.random()*.3+ .7;
+						mesh.applyMatrix( new THREE.Matrix4().makeScale(num,num, num) );
+						mesh.position.x = 3.1+ Math.random()*0.95+ 0.955*i;
+						mesh.position.y = -.5+0.89*k;
+						mesh.position.z = .5+1.5*j;	
+						mesh.castShadow = true; 
+						mesh.receiveShadow = true; 
+						scene.add( mesh );
+						spheres.push( mesh );
+					}
+				}
+			}
+			
+			//PERSONAJES
+			var persona1= new THREE.Mesh( CylinderGeometry, tela4Material );
+			persona1.applyMatrix( new THREE.Matrix4().makeScale(1,0.7,1) );
+			persona1.translateZ( -4 );
+			persona1.translateY( -.4 );
+			persona1.castShadow = true; 
+			persona1.receiveShadow = true; 
+			scene.add(persona1);
+			var persona12= new THREE.Mesh( CylinderGeometry2, telaMaterial );
+			persona12.applyMatrix( new THREE.Matrix4().makeScale(1,0.7,1) );
+			persona12.translateZ( -4 );
+			persona12.translateY( .475 );
+			persona12.castShadow = true; 
+			persona12.receiveShadow = true; 
+			scene.add(persona12);
+			var persona13= new THREE.Mesh( CylinderGeometry3, material2 );
+			persona13.applyMatrix( new THREE.Matrix4().makeScale(1,0.7,1) );
+			persona13.castShadow = true; 
+			persona13.receiveShadow = true; 
+			var persona131= persona13.clone();
+			persona131.translateZ( -4 );
+			persona131.translateY( .8 );			
+			scene.add(persona131);
+			
+			var persona2= new THREE.Mesh( CylinderGeometry, tela2Material );
+			persona2.applyMatrix( new THREE.Matrix4().makeScale(1,0.8,1) );
+			persona2.translateX(1.5);
+			persona2.translateY( -.4 );
+			persona2.translateZ( -2 );
+			persona2.castShadow = true; 
+			persona2.receiveShadow = true; 
+			scene.add(persona2);
+			var persona22= new THREE.Mesh( CylinderGeometry2, telaMaterial );
+			persona22.applyMatrix( new THREE.Matrix4().makeScale(1,0.7,1) );
+			persona22.translateX(1.5);
+			persona22.translateY( .55 );
+			persona22.translateZ( -2 );
+			persona22.castShadow = true; 
+			persona22.receiveShadow = true; 
+			scene.add(persona22);
+			var persona23= persona13.clone();
+			persona23.translateX(1.5);
+			persona23.translateY( .9 );	
+			persona23.translateZ( -2 );			
+			scene.add(persona23);
+
+			var persona3= new THREE.Mesh( CylinderGeometry, tela4Material );
+			persona3.applyMatrix( new THREE.Matrix4().makeScale(1,0.8,1) );
+			persona3.translateX(-2.5);
+			persona3.translateY( -.4 );
+			persona3.translateZ( -2 );
+			persona3.castShadow = true; 
+			persona3.receiveShadow = true; 
+			scene.add(persona3);
+			var persona32= new THREE.Mesh( CylinderGeometry2, tela3Material );
+			persona32.applyMatrix( new THREE.Matrix4().makeScale(1,0.8,1) );
+			persona32.translateX(-2.5);
+			persona32.translateY( .6 );
+			persona32.translateZ( -2 );
+			persona32.castShadow = true; 
+			persona32.receiveShadow = true; 
+			scene.add(persona32);
+			var persona33= persona13.clone();
+			persona33.translateX(-2.5);
+			persona33.translateY( .9);	
+			persona33.translateZ( -2 );			
+			scene.add(persona33);
+			
+			var persona4= new THREE.Mesh( CylinderGeometry,tela4Material );
+			persona4.translateX(1);
+			persona4.translateY( -.4 );
+            persona4.translateZ( 4 );
+			persona4.castShadow = true; 
+			persona4.receiveShadow = true; 
+			scene.add(persona4);
+			var persona42= new THREE.Mesh( CylinderGeometry2,tela4Material );
+			persona42.translateX(1);
+			persona42.translateY( .85 );
+            persona42.translateZ( 4 );
+			persona42.castShadow = true; 
+			persona42.receiveShadow = true; 
+			scene.add(persona42);
+			var persona43= persona13.clone();
+			persona43.translateX(1);
+			persona43.translateY( 1.5);	
+			persona43.translateZ( 4 );			
+			scene.add(persona43);
+			
+			var persona5= new THREE.Mesh( CylinderGeometry, tela3Material );
+            persona5.translateZ( -2 );
+			persona5.translateY( -.4 );
+			persona5.castShadow = true; 
+			persona5.receiveShadow = true; 
+			scene.add(persona5);
+			var persona52= new THREE.Mesh( CylinderGeometry2, telaMaterial );
+            persona52.translateZ( -2 );
+			persona52.translateY( .85 );
+			persona52.castShadow = true; 
+			persona52.receiveShadow = true; 
+			scene.add(persona52);
+			var persona53= persona13.clone();
+			persona53.translateY( 1.3);	
+			persona53.translateZ( -2 );			
+			scene.add(persona53);
+			
+			var persona6= new THREE.Mesh( CylinderGeometry, tela4Material );
+            persona6.translateZ( 4);
+			persona6.translateX( -2.5 );
+			persona6.translateY(-.4 );
+			persona6.castShadow = true; 
+			persona6.receiveShadow = true; 
+			scene.add(persona6);
+			var persona62= new THREE.Mesh( CylinderGeometry2, tela4Material );
+            persona62.translateZ( 4 );
+			persona62.translateX( -2.5 );
+			persona62.translateY(.85 );
+			persona62.castShadow = true; 
+			persona62.receiveShadow = true; 
+			scene.add(persona62);
+			var persona63= persona13.clone();
+			persona63.translateX(-2.5);
+			persona63.translateY( 1.5);	
+			persona63.translateZ( 4 );			
+			scene.add(persona63);
+			
+
+			camera.position.y = 2;
+		  	camera.position.z = -8;
+			camera.lookAt( origin );
+			
+			camera2.position.y = 2.2;
+		  	camera2.position.z = -9;
+			camera2.lookAt( persona53.position );
+			
+		}
+		function animate(){
+			requestAnimationFrame( animate );
+			controls.update();
+			render();
+		}
+		function render(){
+			renderer.setViewport( 0, 0, w, h );
+            renderer.setScissor( 0, 0, w, h );
+            renderer.render( scene, camera );
+			renderer.setViewport( 50, 50, mapWidth, mapHeight );
+            renderer.setScissor( 50, 50, mapWidth, mapHeight );
+            renderer.setScissorTest( true );
+            renderer.render( scene, camera2 );
+		}
+    </script>
+  </body>
+</html>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ILUMINACION</title>
+    <style>
+      html, body { margin: 0; padding: 0; overflow: hidden; }
+    </style>
+  </head>
+  <body>
+    <script src="js/three.js"></script>
+	<script src="js/controls/OrbitControls.js"></script>
+
+    <script>
+		var scene, aspect, camera, renderer, controls;
+		init();
+		animate();
+		function init(){
+			//INICIALIZACIÓN
+	        scene = new THREE.Scene();
+	        aspect = window.innerWidth / window.innerHeight;
+	        camera = new THREE.PerspectiveCamera( 75, aspect, 0.1, 1000);
+	        renderer = new THREE.WebGLRenderer();
+	        renderer.setSize( window.innerWidth, window.innerHeight );
+	        document.body.appendChild( renderer.domElement );
+			controls = new THREE.OrbitControls( camera, renderer.domElement );
+			renderer.shadowMap.enabled = true;
+			renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+			renderer.outputEncoding = THREE.sRGBEncoding;
+			
+			
+			
+			//ELEMENTOS COMUNES
+			var size = 10;
+			var arrowSize = 1;
+			var divisions = size;
+			var origin = new THREE.Vector3( 0, 0, 0 );
+			var x = new THREE.Vector3( 1, 0, 0 );
+			var y = new THREE.Vector3( 0, 1, 0 );
+		  	var z = new THREE.Vector3( 0, 0, 1 );
+		  	var color = new THREE.Color( 0x333333 );
+		  	var colorR = new THREE.Color( 0xAA3333 );
+		  	var colorG = new THREE.Color( 0x33AA33 );
+		  	var colorB = new THREE.Color( 0x333366 );
+			
+
+
+
+            //CREAR ILUMINACIÓN
+			
+			
+
+			//PUNTOS DE LUZ (LUMOS-VARITA MAGICA)
+            
+
+			var sphere = new THREE.SphereBufferGeometry( 0.05, 16, 8 );	
+			var sphere2 = new THREE.SphereBufferGeometry( 0.1, 16, 8 );	
+			var sphere3 = new THREE.SphereBufferGeometry( 0.2, 16, 8 );
+			
+			
+            var pointLight = new THREE.PointLight( 0x00ffee, 3, 3 );
+			pointLight.add( new THREE.Mesh( sphere2, new THREE.MeshBasicMaterial( { color: 0xf0fdff } ) ) );
+            pointLight.position.set( -0.2, 0.5, -5 );
+            scene.add( pointLight );
+			var pointLight2 = new THREE.PointLight( 0x00ffee, 1, 15 );
+			pointLight2.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { color: 0x00ffee } ) ) );
+            pointLight2.position.set( -4.5, 0.5, -2 );
+            scene.add( pointLight2 );			
+			var pointLight3 = new THREE.PointLight( 0x00ffee, 1.5, 5 );
+			pointLight3.add( new THREE.Mesh( sphere3, new THREE.MeshBasicMaterial( { color: 0xf0fdff } ) ) );
+            pointLight3.position.set( 2, 0.5, 3 );
+            scene.add( pointLight3 );
+			var pointLight4 = new THREE.PointLight( 0x00ffee, 1, 5 );
+			pointLight4.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { color: 0x00ffee } ) ) );
+            pointLight4.position.set( 4.5, 0.5, -2 );
+            scene.add( pointLight4 );
+			
+			
+			//LUZ AMBIENTE (OSCURO)
+			var ambient = new THREE.AmbientLight( 0x002429, 0.5);
+			scene.add( ambient );
+			
+			
+			
+			
+			//SPOTLIGHT
+			var spotLight = new THREE.SpotLight( 0x41a1ff, 1 );
+			spotLight.position.set( 0, 8, -20 );
+			spotLight.penumbra = 0.05;
+			spotLight.decay = 2;
+			spotLight.distance = 200;
+			spotLight.castShadow = true;
+			scene.add( spotLight );
+			
+			
+			//LUZ DIRECCIONAL
+
+			var dirLight = new THREE.DirectionalLight( colorB, .5 );
+			dirLight.position.set( -3, 0.5, -5 ).normalize();
+			//scene.add( dirLight );
+			
+			
+			
+			//CREAR LAS GEOMETRÍAS
+			var boxGeometry = new THREE.BoxGeometry( 2, 5, 30 );	
+			var boxGeometry2 = new THREE.BoxGeometry( 200, .1, 200);	
+			var CylinderGeometry = new THREE.CylinderGeometry(.5,.5,2,50);
+			var SphereGeometry = new THREE.SphereGeometry(.1,.1,.1,50);
+			
+			var material = new THREE.MeshPhongMaterial( { color: 0x0a0a0a, dithering: true } );	
+
+			//PISO
+			var geometry = new THREE.PlaneBufferGeometry( 2000, 2000 );
+			var mesh = new THREE.Mesh( geometry, material );
+			mesh.position.set( 0, - 1, 0 );
+			mesh.rotation.x = - Math.PI * 0.5;
+			mesh.receiveShadow = true;
+			scene.add( mesh );
+			
+						
+			//CREAR LOS MATERIALES
+            var material1 = new THREE.MeshStandardMaterial( { color: 0x000000, metalness: 0.5, roughness: 0.1 } );
+			var material2 = new THREE.MeshStandardMaterial( { color: 0xa8a7b1, metalness: 0.5, roughness: 0.1 } );
+			var material3 = new THREE.MeshStandardMaterial( { color: 0xa1a0ab, metalness: 0.5, roughness: 0.1 } );
+			
+			//CREAR LAS MALLAS
+
+			var estante= new THREE.Mesh( boxGeometry, material3 );
+			estante.translateX(-5);			
+			estante.translateZ(15);
+			estante.translateY(1.5);
+			scene.add(estante);
+			
+			var estante2= new THREE.Mesh( boxGeometry, material3 );
+			estante2.translateX(5);
+			estante2.translateZ(15);
+			estante2.translateY(1.5);
+			scene.add(estante2);
+			
+			var persona1= new THREE.Mesh( CylinderGeometry, material2 );
+			persona1.translateZ( -4 );
+			scene.add(persona1);
+			
+			var persona2= new THREE.Mesh( CylinderGeometry, material2 );
+			persona2.translateX(2);
+			persona2.translateZ( -2 );
+			scene.add(persona2);
+
+			var persona3= new THREE.Mesh( CylinderGeometry, material2 );
+			persona3.translateX(-2);
+			persona3.translateZ( -2 );
+			scene.add(persona3);
+			
+			var persona4= new THREE.Mesh( CylinderGeometry, material2 );
+			persona4.translateX(2);
+            persona4.translateZ( 4 );
+			scene.add(persona4);
+			
+
+			camera.position.y = 2;
+		  	camera.position.z = -8;
+			camera.lookAt( origin );
+		}
+		function animate(){
+			requestAnimationFrame( animate );
+			controls.update();
+			render();
+		}
+		function render(){
+			renderer.render( scene, camera );
+		}
+    </script>
+  </body>
+</html>

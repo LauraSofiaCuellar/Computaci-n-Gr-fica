@@ -1,0 +1,377 @@
+ <!DOCTYPE html>
+<html>
+  <head>
+    <title>Geometrias_Raycaster</title>
+    <style>
+      html, body { margin: 0; padding: 0; overflow: hidden; }
+
+
+    </style>
+  </head>
+  <body>
+     <button id="Camara1"> Camara izquierda</button>
+     <button id="Camara2"> Camara derecha</button>
+     <button id="Camara3"> Camara abajo</button>
+     <button id="Camara4"> Camara arriba</button>
+    <script src="js/three.js"></script>
+    <script src="js/controls/OrbitControls.js"></script>
+    <script src='js/libs/dat.gui.min.js'></script>
+    <script>
+		var scene, aspect, camera, camera2, camera3, renderer, controls, vector,raycaster, projector, geometry8;
+		var mesh, mesh2, mesh3, mesh4, mesh5, mesh6, mesh7, helper2, helper3, helper4, helper5, helper6, helper7;
+		var material1, material2,material3,material4,material5, material6,material7, object;
+        var mapWidth = 320, mapHeight = 240;
+        var w = window.innerWidth, h = window.innerHeight;
+        var frustumSize = 5;
+		var startTime = Date.now();
+		var rotcam1=false;
+		var rotcam2=false;
+		var rotcam3=false;
+		var rotcam4=false;
+		init();
+		animate();
+	
+		function init(){
+			scene = new THREE.Scene();
+			scene.background = new THREE.Color( 0xAAAAAA );
+			aspect = window.innerWidth / window.innerHeight;
+			camera = new THREE.PerspectiveCamera( 45, aspect, 0.1, 1000);
+			camera2 = new THREE.PerspectiveCamera( 45, 1.33, 0.1, 50);
+			camera3 = new THREE.PerspectiveCamera( 45, aspect, 0.1, 1000);
+            var helper = new THREE.CameraHelper( camera2 );
+            scene.add( helper );
+			renderer = new THREE.WebGLRenderer({antialias: true});
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			document.body.appendChild( renderer.domElement );
+			controls = new THREE.OrbitControls( camera, renderer.domElement );
+            
+			vector = new THREE.Vector3();
+			camera.getWorldDirection( vector );
+			console.log(vector);
+			
+			var size = 10;
+			var arrowSize = 1;
+			var divisions = size;
+			var origin = new THREE.Vector3( 0, 0, 0 );
+			var x = new THREE.Vector3( 1, 0, 0 );
+			var y = new THREE.Vector3( 0, 1, 0 );
+		  	var z = new THREE.Vector3( 0, 0, 1 );
+			var color1 = new THREE.Color( 0xFFFFFF );
+		  	var color2 = new THREE.Color( 0x333333 );
+		  	var colorR = new THREE.Color( 0xAA3333 );
+		  	var colorG = new THREE.Color( 0x33AA33 );
+		  	var colorB = new THREE.Color( 0x333366 );
+		  
+		  	//CREAR LAS GRILLAS PARA EL ESCENARIO
+		  	var axesHelper = new THREE.AxesHelper( size );
+		  	var gridHelperXY = new THREE.GridHelper( size, divisions, color1, color1);
+		  	var gridHelperXZ = new THREE.GridHelper( size, divisions, color2, color2 );
+		  	var gridHelperYZ = new THREE.GridHelper( size, divisions, color2, color2 );
+            
+            //ROTARLAS PARA QUE QUEDEN EN EL ESPACIO ADECUADO
+            gridHelperXY.rotateOnWorldAxis ( x, THREE.Math.degToRad(90) );
+            gridHelperXZ.rotateOnWorldAxis ( y, THREE.Math.degToRad(90) );
+            gridHelperYZ.rotateOnWorldAxis ( z, THREE.Math.degToRad(90) );
+            
+            //CREAR LAS FLECHAS QUE INDICAN LOS EJES DE COORDENADAS 3D
+            var arrowX = new THREE.ArrowHelper( x, origin, arrowSize, colorR );
+            var arrowY = new THREE.ArrowHelper( y, origin, arrowSize, colorG );
+            var arrowZ = new THREE.ArrowHelper( z, origin, arrowSize, colorB );
+            
+            //CREAR ILUMINACIÓN
+            var ambient = new THREE.AmbientLight( 0xffffff, 2 );
+            scene.add( ambient );
+            
+            var pointLight = new THREE.PointLight( 0xffffff, 1, 100 );
+            pointLight.position.set( 5, 5, -5 );
+            scene.add( pointLight );
+            
+			//CREAR LAS GEOMETRÍAS
+			//Far plane
+			var width = 16.0;
+			var height = 9.0;
+			var planeGeometry = new THREE.PlaneGeometry(width, height);
+
+			//CUBO EN EL ESPACIO
+			var boxGeometry = new THREE.BoxGeometry(1,2,1);
+				
+            //CREAR LOS MATERIALES
+             material1 = new THREE.MeshStandardMaterial( { color: 0xfc804b, metalness: 0.5, roughness: 0.1 } );
+             material2 = new THREE.MeshStandardMaterial( { color: 0x68dbdf, metalness: 0.5, roughness: 0.1 } );
+             material3 = new THREE.MeshStandardMaterial( { color: 0xdfb068, metalness: 0.5, roughness: 0.1 } );
+			 material4 = new THREE.MeshStandardMaterial( { color: 0xc2c780, metalness: 0.5, roughness: 0.1 } );
+			 material5 = new THREE.MeshStandardMaterial( { color: 0xc867e0, metalness: 0.5, roughness: 0.1 } );
+			 material6 = new THREE.MeshStandardMaterial( { color: 0x485aff, metalness: 0.5, roughness: 0.1 } );
+			 material7 = new THREE.MeshStandardMaterial( { color: 0x48b1ff, metalness: 0.5, roughness: 0.1 } );
+			
+			//CREAR LOS OBJETOS
+            scene.add( arrowX );
+            scene.add( arrowY );
+            scene.add( arrowZ );
+            
+            var geometry = new THREE.CylinderGeometry( 3, 3, 16, 16 );
+			var geometry2 = new THREE.BoxGeometry( 3, 16, 3);
+			var geometry3= new THREE.CylinderGeometry(3,5,3,10);
+			var geometry4= new THREE.TorusGeometry(3, 1, 5, 5);
+			var geometry5= new THREE.SphereGeometry( 4, 10, 10 );
+			var geometry6= new THREE.BoxGeometry( 3, 3, 3);
+			var geometry7= new THREE.BoxGeometry( 8, 8, 8);
+			geometry8= new THREE.BoxGeometry( 2, 2, 0.1);
+			
+
+			mesh = new THREE.Mesh( geometry, material1 );
+		    mesh2=new THREE.Mesh( geometry2, material2 );
+		    mesh3=new THREE.Mesh( geometry3, material3 );
+			mesh4=new THREE.Mesh( geometry4, material4 );
+			mesh5=new THREE.Mesh( geometry5, material5 );
+			mesh6=new THREE.Mesh( geometry6, material6 );
+			mesh7=new THREE.Mesh( geometry7, material7 );
+			
+			mesh.translateZ(-25);
+			
+			mesh2.translateZ(-25);
+			mesh2.translateX(-20);
+			mesh2.translateY(8);
+			
+			mesh3.translateZ(-25);
+			mesh3.translateX(-25);
+			mesh3.translateY(-5);	
+			
+			mesh4.translateZ(-35);
+			mesh4.translateX(15);
+			mesh4.translateY(-5);
+
+			mesh5.translateZ(-45);
+			mesh5.translateX(30);
+			mesh5.translateY(7);
+			
+			mesh6.translateZ(-40);
+			mesh6.translateX(8);
+			mesh6.translateY(12);
+
+			mesh7.translateZ(-40);
+			mesh7.translateX(-15);
+			mesh7.translateY(12);	
+
+			var helper  = new THREE.FaceNormalsHelper( mesh , 2, 0x0000ff, 1 );
+			var helper2 = new THREE.FaceNormalsHelper( mesh2, 2, 0x0000ff, 1 );
+			var helper3 = new THREE.FaceNormalsHelper( mesh3, 2, 0x0000ff, 1 );
+			var helper4 = new THREE.FaceNormalsHelper( mesh4, 2, 0x0000ff, 1 );
+			var helper5 = new THREE.FaceNormalsHelper( mesh5, 2, 0x0000ff, 1 );
+			var helper6 = new THREE.FaceNormalsHelper( mesh6, 2, 0x0000ff, 1 );
+			var helper7 = new THREE.FaceNormalsHelper( mesh7, 2, 0x0000ff, 1 );
+								
+			
+			scene.add(mesh, mesh2, mesh3, mesh4, mesh5, mesh6, mesh7, helper, helper2, helper3, helper4, helper5, helper6, helper7);
+			
+			camera.position.x = 0;
+			camera.position.y = 20;
+		  	camera.position.z = 80;
+			
+			camera3.position.x = -65;
+			camera3.position.y = 0;
+		  	//camera3.position.z = 80;
+			camera3.lookAt(mesh.position);
+			
+			//camera2.position.y=20;
+			camera2.lookAt(mesh.position);
+			
+			raycaster = new THREE.Raycaster();	
+            projector = new THREE.Projector();
+			
+		  	camera.lookAt( origin );
+		}
+		
+		/*Camara1.onclick=function (){
+		rotcam1=true;
+		rotcam2=false;
+		rotcam3=false;
+		rotcam4=false;
+		}
+		Camara1.ondblclick=function (){
+		rotcam1=false;
+		rotcam2=false;
+		rotcam3=false;
+		rotcam4=false;
+		}
+		Camara2.onclick=function (){
+		rotcam1=false;
+		rotcam2=true;
+		rotcam3=false;
+		rotcam4=false;
+		}
+		Camara2.ondblclick=function (){
+		rotcam1=false;
+		rotcam2=false;
+		rotcam3=false;
+		rotcam4=false;
+		}
+		Camara3.onclick=function (){
+		rotcam1=false;
+		rotcam2=false;
+		rotcam3=true;
+		rotcam4=false;
+		}
+		Camara3.ondblclick=function (){
+		rotcam1=false;
+		rotcam2=false;
+		rotcam3=false;
+		rotcam4=false;
+		}
+		Camara4.onclick=function (){
+		rotcam1=false;
+		rotcam2=false;
+		rotcam3=false;
+		rotcam4=true;
+		}
+		Camara4.ondblclick=function (){
+		rotcam1=false;
+		rotcam2=false;
+		rotcam3=false;
+		rotcam4=false;
+		}*/
+		
+		function animate() {
+			requestAnimationFrame( animate );
+			controls.update(); // required if controls.enableDamping = true, or if controls.autoRotate = true
+			render();
+		}
+		
+		
+
+
+        function render() {
+			
+
+			
+		
+        /*var dtime = Date.now()-startTime;
+		var tx=0, ty=0, tz=0;
+		if(rotcam1) {
+			tx=1;
+		}
+		if(rotcam2) {
+			tx=-1;
+		}
+		if(rotcam3) {
+			ty=1;
+		}
+		if(rotcam4) {
+			ty=-1;
+		}
+
+		//MATRIZ DE TRASLACIÓN
+		var t = new THREE.Matrix4();		//Crear la matriz de traslación
+		t.set( 	1, 0, 0, tx,
+				0, 1, 0, ty, 
+				0, 0, 1, tz,
+				0, 0, 0, 1	);
+
+		camera2.applyMatrix(t);			//Aplicar la matriz de traslación al objeto		
+        camera2.lookAt(mesh.position);*/
+
+		
+			projector.unprojectVector( vector, camera2 );
+
+			raycaster.set( camera2.position, vector.sub( camera2.position ).normalize() );
+
+			var intersects = raycaster.intersectObjects( scene.children );
+			if (intersects.length > 0) {
+
+			for (j=0;j<5;j++){
+			for(var i=0; i<mesh.geometry.faces.length; i++){
+			if(vector.dot(mesh.geometry.faces[i].normal)>=0){
+					mesh.geometry.faces.splice(i,1);					
+					mesh.geometry.elementsNeedUpdate = true;
+					var mesh8= new THREE.Mesh( geometry8, material1 );
+					mesh8.translateY(25);
+					scene.add(mesh8);
+				}
+			}	
+			
+			for(var i=0; i<mesh2.geometry.faces.length; i++){
+				if(vector.dot(mesh2.geometry.faces[i].normal)>=0){
+					mesh2.geometry.faces.splice(i,1);
+					mesh2.geometry.elementsNeedUpdate = true;	
+					var mesh9= new THREE.Mesh( geometry8, material2 );
+					mesh9.translateX(2);
+					mesh9.translateY(25);
+					scene.add(mesh9);
+				}				
+			}
+			for(var i=0; i<mesh3.geometry.faces.length; i++){
+				if(vector.dot(mesh3.geometry.faces[i].normal)>=0){
+					mesh3.geometry.faces.splice(i,1);
+					mesh3.geometry.elementsNeedUpdate = true;
+					var mesh10= new THREE.Mesh( geometry8, material3 );
+					mesh10.translateX(4);
+					mesh10.translateY(25);
+					scene.add(mesh10);					
+				}				
+			}
+			for(var i=0; i<mesh4.geometry.faces.length; i++){
+				if(vector.dot(mesh4.geometry.faces[i].normal)>=0){
+					mesh4.geometry.faces.splice(i,1);
+					mesh4.geometry.elementsNeedUpdate = true;	
+					var mesh11= new THREE.Mesh( geometry8, material4 );
+					mesh11.translateX(6);
+					mesh11.translateY(25);
+					scene.add(mesh11);						
+				}				
+			}
+			for(var i=0; i<mesh5.geometry.faces.length; i++){
+				if(vector.dot(mesh5.geometry.faces[i].normal)>=0){
+					mesh5.geometry.faces.splice(i,1);
+					mesh5.geometry.elementsNeedUpdate = true;	
+					var mesh12= new THREE.Mesh( geometry8, material5 );
+					mesh12.translateX(8);
+					mesh12.translateY(25);
+					scene.add(mesh12);					
+				}				
+			}
+			for(var i=0; i<mesh6.geometry.faces.length; i++){
+				if(vector.dot(mesh6.geometry.faces[i].normal)>=0){
+					mesh6.geometry.faces.splice(i,1);
+					mesh6.geometry.elementsNeedUpdate = true;	
+					var mesh13= new THREE.Mesh( geometry8, material6 );
+					mesh13.translateX(10);
+					mesh13.translateY(25);
+					scene.add(mesh13);					
+				}				
+			}
+			for(var i=0; i<mesh7.geometry.faces.length; i++){
+				if(vector.dot(mesh7.geometry.faces[i].normal)>=0){
+					mesh7.geometry.faces.splice(i,1);
+					mesh7.geometry.elementsNeedUpdate = true;
+					var mesh14= new THREE.Mesh( geometry8, material7 );
+					mesh14.translateX(12);
+					mesh14.translateY(25);
+					scene.add(mesh14);					
+				}				
+			}
+			}			
+			}
+            renderer.setViewport( 0, 0, w, h );
+            renderer.setScissor( 0, 0, w, h );
+            renderer.render( scene, camera );
+            renderer.setViewport( 50, 50, mapWidth, mapHeight );
+            renderer.setScissor( 50, 50, mapWidth, mapHeight );
+            renderer.setScissorTest( true );
+            renderer.render( scene, camera2 );
+			renderer.setViewport( 50, 300, mapWidth, mapHeight );
+            renderer.setScissor( 50, 300, mapWidth, mapHeight );
+            renderer.setScissorTest( true );
+            renderer.render( scene, camera3 );		
+		
+		}
+    </script>
+  </body>
+</html>
+
+
+
+
+
+
+
+
